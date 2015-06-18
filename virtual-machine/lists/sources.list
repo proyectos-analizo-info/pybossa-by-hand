@@ -1,0 +1,28 @@
+# "Ubuntu 14.04.2 LTS" (trusty)
+
+# Mirror "Universidad de Zaragoza"
+# https://launchpad.net/ubuntu/+mirror/softlibre.unizar.es-archive
+
+# Main updates
+deb http://softlibre.unizar.es/ubuntu/archive trusty main restricted universe multiverse
+# deb-src http://softlibre.unizar.es/ubuntu/archive trusty main restricted universe multiverse
+
+# Important security updates
+deb http://softlibre.unizar.es/ubuntu/archive trusty-updates main restricted universe multiverse
+# deb-src http://softlibre.unizar.es/ubuntu/archive trusty-updates main restricted universe multiverse
+
+# Recommended updates
+deb http://softlibre.unizar.es/ubuntu/archive trusty-security main restricted universe multiverse
+# deb-src http://softlibre.unizar.es/ubuntu/archive trusty-security main restricted universe multiverse
+
+# Unsupported updates
+deb http://softlibre.unizar.es/ubuntu/archive trusty-backports main restricted universe multiverse
+# deb-src http://softlibre.unizar.es/ubuntu/archive trusty-backports main restricted universe multiverse
+
+# Canonical Partners
+deb http://archive.canonical.com/ubuntu trusty partner
+# deb-src http://archive.canonical.com/ubuntu trusty partner
+
+# Independent
+deb http://extras.ubuntu.com/ubuntu trusty main
+# deb-src http://extras.ubuntu.com/ubuntu trusty main

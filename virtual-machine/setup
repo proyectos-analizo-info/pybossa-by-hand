@@ -1,0 +1,81 @@
+> VirtualBox
+
+/media/developer/VBOXADDITIONS_4.3.28_100309
+
+sudo sh VBoxLinuxAdditions.run
+
+sudo reboot
+
+cd /media
+
+sudo adduser `whoami` vboxsf
+
+ln -s /media/sf_analizo /home/`whoami`
+
+ln -s /media/sf_analizo /home/`whoami`/Escritorio
+
+sudo reboot
+
+---
+
+> sources.list
+
+sudo apt-get update
+
+sudo cp /etc/apt/sources.list /etc/apt/sources.list.bak
+
+sudo cp lists/sources.list /etc/apt/sources.list
+
+sudo apt-get update && sudo apt-get -d upgrade -y && sudo apt-get upgrade -y
+
+sudo apt-get -d dist-upgrade -y && sudo apt-get dist-upgrade -y
+
+sudo apt-get install build-essential -y && sudo apt-get install linux-headers-$(uname -r) -y
+
+---
+
+> swappiness
+
+cat /proc/sys/vm/swappiness
+
+sudo sysctl -w vm.swappiness=75
+
+sudo sh -c 'echo "vm.swappiness=75" >> /etc/sysctl.conf'
+
+cat /etc/sysctl.conf
+
+---
+
+sudo apt-get install geany vim meld terminator synaptic gnome-system-monitor unrar unzip git filezilla tree -y
+
+# sudo chown -R `whoami`:`whoami` .config/geany/
+
+---
+
+> java
+
+sudo cp lists/java.list /etc/apt/sources.list.d
+
+sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys C2518248EEA14886
+
+sudo apt-get update && sudo apt-get install oracle-java8-installer oracle-java8-set-default oracle-java8-unlimited-jce-policy -y
+
+sudo update-alternatives --config java
+
+sudo update-alternatives --config javac
+
+sudo update-alternatives --config javaws
+
+java -version
+
+javac -version
+
+---
+
+> smartgit
+
+sudo cp lists/smartgit.list /etc/apt/sources.list.d
+
+sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys E61380B28313A596
+
+sudo apt-get update && sudo apt-get install smartgit -y
