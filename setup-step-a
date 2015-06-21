@@ -1,0 +1,165 @@
+http://docs.pybossa.com/en/latest/install.html
+
+---
+
+> Install your own PyBossa server
+    
+    - Installing PyBossa by hand
+
+---
+
+Ubuntu 14.04 LTS
+Python >= 2.7.6, <3.0
+PostgreSQL >= 9.3
+Redis >= 2.6
+pip >= 6.1
+
+---
+
+> Installing git (a distributed version control system)
+
+sudo apt-get install -y git-core
+
+> Installing the PostgreSQL database
+
+sudo apt-get install -y postgresql postgresql-server-dev-all libpq-dev python-psycopg2
+
+> Installing virtualenv
+
+sudo apt-get install -y python-virtualenv
+
+> Installing the PyBossa Python requirements
+
+sudo apt-get install -y python-dev build-essential libjpeg-dev libssl-dev swig libffi-dev
+
+> Get the latest source code (/home/developer)
+
+git clone --recursive https://github.com/PyBossa/pybossa.git
+
+> Create a virtual environment
+
+cd pybossa
+
+virtualenv env
+
+> Activate the virtual environment
+
+source env/bin/activate
+
+> Upgrade pip to latest version
+
+pip install -U pip
+
+> Install the required libraries
+
+pip install -r requirements.txt
+
+> Generate random keys
+
+python
+
+import os
+
+os.urandom(24)
+
+'\x8a[\xd2\xcf\x87\x92{g;\xa8fC\x1c\xe9\x99<\xf7\xb5wzvW\xc4\x98'
+
+os.urandom(24)
+
+'\x9de\xdd\xb9\xf2e\xe3\xec\xa6+\x13\xaeGgc\xbb\x03V\xaf\x19\xcf\x01\x0fu'
+
+os.urandom(24)
+
+'V\xfcVaO\x8a\xe4S\x86\xcb\xe9\xa2\x9f\x8b[\x11\xf6\x08\xee%\xd7q\xbf\x15'
+
+exit()
+
+> Create a settings file
+
+cp settings_local.py.tmpl settings_local.py
+
+> Configure the settings file
+
+geany settings_local.py
+
+HOST = 'localhost'
+
+SECRET = '\x8a[\xd2\xcf\x87\x92{g;\xa8fC\x1c\xe9\x99<\xf7\xb5wzvW\xc4\x98'
+
+SECRET_KEY = '\x9de\xdd\xb9\xf2e\xe3\xec\xa6+\x13\xaeGgc\xbb\x03V\xaf\x19\xcf\x01\x0fu'
+
+SQLALCHEMY_DATABASE_URI = 'postgresql://pybossa:password@localhost/pybossa'
+
+ITSDANGEROUSKEY = 'V\xfcVaO\x8a\xe4S\x86\xcb\xe9\xa2\x9f\x8b[\x11\xf6\x08\xee%\xd7q\xbf\x15'
+
+BRAND = 'analizo.info'
+TITLE = 'proyectos'
+LOGO = 'default_logo.png'
+COPYRIGHT = 'COPYRIGHT'
+DESCRIPTION = 'DESCRIPTION'
+TERMSOFUSE = 'http://okfn.org/terms-of-use/'
+DATAUSE = 'http://opendatacommons.org/licenses/by/'
+CONTACT_EMAIL = 'contacto@analizo.info'
+CONTACT_TWITTER = 'analizoinfo'
+
+ADMINS = ['contacto@analizo.info']
+
+MAIL_DEFAULT_SENDER = 'analizo.info · proyectos <proyectos-analizo-info@no-reply.com>'
+
+> Create the alembic config file
+
+cp alembic.ini.template alembic.ini
+
+geany alembic.ini
+
+sqlalchemy.url = postgresql://pybossa:password@localhost/pybossa
+
+> Installing Redis
+
+sudo apt-get install -y redis-server
+
+dpkg -s redis-server | grep -E "Package|Version"
+
+Package: redis-server
+Version: 2:2.8.4-2
+
+> Check contrib/sentinel.conf
+
+cat contrib/sentinel.conf
+
+daemonize yes
+sentinel monitor mymaster 127.0.0.1 6379 2
+sentinel down-after-milliseconds mymaster 60000
+sentinel failover-timeout mymaster 180000
+sentinel parallel-syncs mymaster 1
+
+> Run redis
+
+redis-server contrib/sentinel.conf --sentinel
+
+> Check redis
+
+ps -ef | grep redis-server
+
+/usr/bin/redis-server 127.0.0.1:6379
+redis-server *:26379
+
+> Configuring the database
+
+sudo su postgres
+
+createuser -d -P pybossa
+
+createdb pybossa -O pybossa
+
+exit
+
+> Populate the database
+
+python cli.py db_create
+
+> Run PyBossa
+
+python run.py &
+
+http://localhost:5000
