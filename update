@@ -1,0 +1,27 @@
+http://docs.pybossa.com/en/latest/install.html#updating-pybossa
+
+---
+
+> Updating PyBossa
+
+cd pybossa
+
+> Get the latest source code (/home/developer)
+
+git pull origin master
+
+> Activate the virtual environment
+
+source env/bin/activate
+
+> Upgrade pip to latest version
+
+pip install -U pip
+
+> Install the required libraries
+
+pip install -U -r requirements.txt
+
+> Update the database
+
+alembic upgrade head
