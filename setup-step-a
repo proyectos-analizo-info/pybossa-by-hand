@@ -82,6 +82,8 @@ cp settings_local.py.tmpl settings_local.py
 
 geany settings_local.py
 
+---
+
 HOST = 'localhost'
 
 SECRET = '\x8a[\xd2\xcf\x87\x92{g;\xa8fC\x1c\xe9\x99<\xf7\xb5wzvW\xc4\x98'
@@ -106,13 +108,19 @@ ADMINS = ['contacto@analizo.info']
 
 MAIL_DEFAULT_SENDER = 'analizo.info · proyectos <proyectos-analizo-info@no-reply.com>'
 
+---
+
 > Create the alembic config file
 
 cp alembic.ini.template alembic.ini
 
 geany alembic.ini
 
+---
+
 sqlalchemy.url = postgresql://pybossa:password@localhost/pybossa
+
+---
 
 > Installing Redis
 
@@ -139,10 +147,14 @@ redis-server contrib/sentinel.conf --sentinel
 
 > Check redis
 
-ps -ef | grep redis-server
+ps aux | grep redis
 
 /usr/bin/redis-server 127.0.0.1:6379
 redis-server *:26379
+
+htop
+
+> Configure RQ and RQScheduler (setup-step-b)
 
 > Configuring the database
 
