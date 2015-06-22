@@ -1,27 +1,23 @@
 http://docs.pybossa.com/en/latest/install.html#updating-pybossa
 
----
+----------------
+Updating PyBossa
+----------------
 
-> Updating PyBossa
-
-cd pybossa
-
-> Get the latest source code (/home/developer)
+cd /home/`whoami`/pybossa
 
 git pull origin master
 
-> Activate the virtual environment
-
-source env/bin/activate
-
-> Upgrade pip to latest version
+source /home/`whoami`/pybossa/env/bin/activate
 
 pip install -U pip
 
-> Install the required libraries
-
 pip install -U -r requirements.txt
 
-> Update the database
-
 alembic upgrade head
+
+sudo supervisorctl restart rq-scheduler
+
+sudo supervisorctl restart rq-worker
+
+sudo supervisorctl restart pybossa
