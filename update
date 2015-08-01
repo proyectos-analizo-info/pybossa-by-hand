@@ -1,5 +1,11 @@
 http://docs.pybossa.com/en/latest/install.html#updating-pybossa
 
+sudo service supervisor stop
+
+sudo service nginx stop
+
+find /home/`whoami`/pybossa -type f -name '*.pyc' -delete
+
 ----------------
 Updating PyBossa
 ----------------
@@ -8,13 +14,232 @@ cd /home/`whoami`/pybossa
 
 git pull origin master
 
-source /home/`whoami`/pybossa/env/bin/activate
+---
 
-pip install -U pip
+remote: Counting objects: 88, done.
+remote: Compressing objects: 100% (67/67), done.
+remote: Total 88 (delta 49), reused 14 (delta 14), pack-reused 7
+Unpacking objects: 100% (88/88), done.
+De https://github.com/PyBossa/pybossa
+ * branch            master     -> FETCH_HEAD
+   93a4d5e..fa1c090  master     -> origin/master
+Fetching submodule pybossa/themes/default
+remote: Counting objects: 21, done.
+remote: Compressing objects: 100% (10/10), done.
+remote: Total 21 (delta 7), reused 5 (delta 5), pack-reused 6
+Unpacking objects: 100% (21/21), done.
+De git://github.com/PyBossa/pybossa-default-theme
+   757b463..0bda4e3  chile      -> origin/chile
+ * [new branch]      issue-1134-empty-presener -> origin/issue-1134-empty-presener
+   ee916e9..73d8a36  master     -> origin/master
+Updating 93a4d5e..fa1c090
+error: Your local changes to the following files would be overwritten by merge:
+	pybossa/model/user.py
+Please, commit your changes or stash them before you can merge.
+Aborting
 
-pip install -U -r requirements.txt
+developer@analizo:~/pybossa$ cd pybossa/model/
+developer@analizo:~/pybossa/pybossa/model$ mv user.py user.py_mod
+developer@analizo:~/pybossa/pybossa/model$ mv user.py_bak user.py
+
+# retry
+
+git pull origin master
+
+-
+De https://github.com/PyBossa/pybossa
+ * branch            master     -> FETCH_HEAD
+Updating 93a4d5e..fa1c090
+Fast-forward
+ .gitmodules                                   |  6 +++---
+ alembic/versions/151b2f642877_text_to_json.py | 36 ++++++++++++++++++++++++++++++++++++
+ pybossa/cache/projects.py                     | 23 +++++++++++------------
+ pybossa/cache/site_stats.py                   |  3 +--
+ pybossa/cache/users.py                        | 36 +++++++++++++++++-------------------
+ pybossa/model/__init__.py                     | 77 -----------------------------------------------------------------------------
+ pybossa/model/project.py                      |  6 ++++--
+ pybossa/model/task.py                         |  6 +++---
+ pybossa/model/task_run.py                     |  5 +++--
+ pybossa/model/user.py                         |  6 ++++--
+ pybossa/repositories/task_repository.py       | 34 +++++++++++++++++++++++++++-------
+ pybossa/sched.py                              | 32 +++++++++++++++-----------------
+ pybossa/themes/default                        |  2 +-
+ pybossa/util.py                               | 38 ++++++++++++++++++++++----------------
+ setup.py                                      |  3 +--
+ test/factories/taskrun_factory.py             |  2 ++
+ test/factories/user_factory.py                |  1 +
+ test/test_repository/test_task_repository.py  |  3 +--
+ test/test_sched.py                            |  3 +--
+ 19 files changed, 153 insertions(+), 169 deletions(-)
+ create mode 100644 alembic/versions/151b2f642877_text_to_json.py
+
+# check
+
+git pull origin master
+
+-
+De https://github.com/PyBossa/pybossa
+ * branch            master     -> FETCH_HEAD
+Already up-to-date.
+-
+
+# apply changes to "user.py"
+
+meld user.py user.py_mod
+
+mv user.py_mod user.py_bak
+
+---
+
+* user locale fix
+
+psql -U postgres -d pybossa -c "UPDATE public.user SET locale = 'es';"
+
+---
+
+cd /home/`whoami`/pybossa
+
+source env/bin/activate
+
+pip install -U pip && pip install -U -r requirements.txt && pip install -U uwsgi
+
+python cli.py markdown_db_migrate
+
+-
+(env)developer@analizo:~/pybossa$ python cli.py markdown_db_migrate
+Slave binds are misssing, adding Master as slave too.
+<type 'exceptions.KeyError'>
+('TWITTER_CONSUMER_KEY',)
+'TWITTER_CONSUMER_KEY'
+Twitter signin disabled
+--------------------------------------------------------------------------------
+ERROR in core [/home/developer/pybossa/pybossa/core.py:277]:
+Twitter signin disabled: 'TWITTER_CONSUMER_KEY'
+--------------------------------------------------------------------------------
+<type 'exceptions.KeyError'>
+('FACEBOOK_APP_ID',)
+'FACEBOOK_APP_ID'
+Facebook signin disabled
+--------------------------------------------------------------------------------
+ERROR in core [/home/developer/pybossa/pybossa/core.py:292]:
+Facebook signin disabled: 'FACEBOOK_APP_ID'
+--------------------------------------------------------------------------------
+<type 'exceptions.KeyError'>
+('GOOGLE_CLIENT_ID',)
+'GOOGLE_CLIENT_ID'
+Google signin disabled
+--------------------------------------------------------------------------------
+ERROR in core [/home/developer/pybossa/pybossa/core.py:307]:
+Google signin disabled: 'GOOGLE_CLIENT_ID'
+--------------------------------------------------------------------------------
+<type 'exceptions.KeyError'>
+('FLICKR_API_KEY',)
+'FLICKR_API_KEY'
+Flickr importer not available
+--------------------------------------------------------------------------------
+ERROR in core [/home/developer/pybossa/pybossa/core.py:322]:
+Flickr importer not available: 'FLICKR_API_KEY'
+--------------------------------------------------------------------------------
+<type 'exceptions.KeyError'>
+('DROPBOX_APP_KEY',)
+'DROPBOX_APP_KEY'
+Dropbox importer not available
+--------------------------------------------------------------------------------
+ERROR in core [/home/developer/pybossa/pybossa/core.py:334]:
+Dropbox importer not available: 'DROPBOX_APP_KEY'
+--------------------------------------------------------------------------------
+(env)developer@analizo:~/pybossa$ python cli.py markdown_db_migrate
+Slave binds are misssing, adding Master as slave too.
+<type 'exceptions.KeyError'>
+('TWITTER_CONSUMER_KEY',)
+'TWITTER_CONSUMER_KEY'
+Twitter signin disabled
+--------------------------------------------------------------------------------
+ERROR in core [/home/developer/pybossa/pybossa/core.py:277]:
+Twitter signin disabled: 'TWITTER_CONSUMER_KEY'
+--------------------------------------------------------------------------------
+<type 'exceptions.KeyError'>
+('FACEBOOK_APP_ID',)
+'FACEBOOK_APP_ID'
+Facebook signin disabled
+--------------------------------------------------------------------------------
+ERROR in core [/home/developer/pybossa/pybossa/core.py:292]:
+Facebook signin disabled: 'FACEBOOK_APP_ID'
+--------------------------------------------------------------------------------
+<type 'exceptions.KeyError'>
+('GOOGLE_CLIENT_ID',)
+'GOOGLE_CLIENT_ID'
+Google signin disabled
+--------------------------------------------------------------------------------
+ERROR in core [/home/developer/pybossa/pybossa/core.py:307]:
+Google signin disabled: 'GOOGLE_CLIENT_ID'
+--------------------------------------------------------------------------------
+<type 'exceptions.KeyError'>
+('FLICKR_API_KEY',)
+'FLICKR_API_KEY'
+Flickr importer not available
+--------------------------------------------------------------------------------
+ERROR in core [/home/developer/pybossa/pybossa/core.py:322]:
+Flickr importer not available: 'FLICKR_API_KEY'
+--------------------------------------------------------------------------------
+<type 'exceptions.KeyError'>
+('DROPBOX_APP_KEY',)
+'DROPBOX_APP_KEY'
+Dropbox importer not available
+--------------------------------------------------------------------------------
+ERROR in core [/home/developer/pybossa/pybossa/core.py:334]:
+Dropbox importer not available: 'DROPBOX_APP_KEY'
+--------------------------------------------------------------------------------
+-
 
 alembic upgrade head
+
+-
+(env)developer@analizo:~/pybossa$ alembic upgrade head
+INFO  [alembic.migration] Context impl PostgresqlImpl.
+INFO  [alembic.migration] Will assume transactional DDL.
+INFO  [alembic.migration] Running upgrade 3620d7cac37b -> 4ad4fddc76f8, add privacy mode to user
+INFO  [alembic.migration] Running upgrade 4ad4fddc76f8 -> 46c3f68e950a, add table constraints to user locale and privacy mode
+INFO  [alembic.migration] Running upgrade 46c3f68e950a -> 3da51a88205a, ckan api key constraint
+INFO  [alembic.migration] Running upgrade 3da51a88205a -> 1eb5febf4842, Create blogpost table
+INFO  [alembic.migration] Running upgrade 1eb5febf4842 -> 7927d63d556, n_answers migration
+INFO  [alembic.migration] Running upgrade 7927d63d556 -> 537db2979434, Add category constraint to app/project
+INFO  [alembic.migration] Running upgrade 537db2979434 -> 29353a1877ba, Remove featured table
+INFO  [alembic.migration] Running upgrade 29353a1877ba -> 66594a9866c, add updated and state to app
+INFO  [alembic.migration] Running upgrade 66594a9866c -> a9ecd1c767, add pro field to user table
+INFO  [alembic.migration] Running upgrade a9ecd1c767 -> 188c85878d36, add webhook column
+INFO  [alembic.migration] Running upgrade 188c85878d36 -> f8bc21a0be7, Add audit log table
+INFO  [alembic.migration] Running upgrade f8bc21a0be7 -> 38a8a6299086, Add newsletter columns
+INFO  [alembic.migration] Running upgrade 38a8a6299086 -> bbba2255e00, add email validation column
+INFO  [alembic.migration] Running upgrade bbba2255e00 -> 4e435ff8ba74, Add subscribe column to user table
+INFO  [alembic.migration] Running upgrade 4e435ff8ba74 -> aee7291c81, Rename app table to project
+INFO  [alembic.migration] Running upgrade aee7291c81 -> ac115763654, remove_completed_column_from_project
+INFO  [alembic.migration] Running upgrade ac115763654 -> 151b2f642877, text to JSON
+-
+
+sudo service supervisor start
+
+sudo service nginx start
+
+-
+* Retry (sudo service supervisor restart) until it starts
+
+http://localhost
+
+ps aux | grep redis
+
+ps aux | grep rq
+-
+
+python run.py
+
+redis-cli FLUSHALL
+
+BGSAVE
+
+deactivate
+
+---
 
 sudo supervisorctl restart rq-scheduler
 
