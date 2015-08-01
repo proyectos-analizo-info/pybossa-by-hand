@@ -20,9 +20,17 @@ cd /home/`whoami`
 
 git clone --recursive https://github.com/PyBossa/pybossa.git
 
-mkdir /home/`whoami`/pybossa/logs
+tar -czvf pybossa.tar.gz pybossa/
 
-mkdir /home/`whoami`/pybossa/sockets
+mkdir /home/`whoami`/pybossa/logs /home/`whoami`/pybossa/sockets
+
+cd /home/`whoami`/pybossa/dat
+
+wget http://geolite.maxmind.com/download/geoip/database/GeoLiteCity.dat.gz
+
+gunzip GeoLiteCity.dat.gz
+
+---
 
 cd /home/`whoami`/pybossa
 
@@ -30,11 +38,107 @@ virtualenv /home/`whoami`/pybossa/env
 
 source /home/`whoami`/pybossa/env/bin/activate
 
-pip install -U pip
+pip install -U pip && pip install -U -r requirements.txt && pip install -U uwsgi
 
-pip install -U -r requirements.txt
+deactivate
 
-pip install -U uwsgi
+---
+
+cp alembic.ini.template alembic.ini
+
+cp settings_local.py.tmpl settings_local.py
+
+cp contrib/nginx/pybossa contrib/nginx/pybossa.template
+
+cp contrib/pybossa.ini.template contrib/pybossa.ini
+
+cp contrib/supervisor/pybossa.conf.template contrib/supervisor/pybossa.conf
+
+pybossa-email.conf
+
+cp contrib/supervisor/rq-scheduler.conf.template contrib/supervisor/rq-scheduler.conf
+
+cp contrib/supervisor/rq-worker.conf.template contrib/supervisor/rq-worker.conf
+
+---
+
+geany settings_local.py alembic.ini contrib/nginx/pybossa contrib/pybossa.ini contrib/supervisor/rq-scheduler.conf contrib/supervisor/rq-worker.conf contrib/supervisor/pybossa.conf
+
+---
+
+sudo geany /etc/supervisor/conf.d/pybossa-email.conf
+
+---
+
+sudo cp contrib/nginx/pybossa /etc/nginx/sites-available
+sudo rm /etc/nginx/sites-enabled/default
+sudo ln -s /etc/nginx/sites-available/pybossa /etc/nginx/sites-enabled/pybossa
+
+sudo cp contrib/supervisor/redis-server.conf /etc/supervisor/conf.d
+sudo cp contrib/supervisor/redis-sentinel.conf /etc/supervisor/conf.d
+
+sudo service redis-server stop && sudo rm /etc/init.d/redis-server
+
+sudo cp contrib/redis-supervisor/redis.conf /etc/redis
+sudo cp contrib/redis-supervisor/sentinel.conf /etc/redis
+
+sudo chown redis:redis /etc/redis/redis.conf
+sudo chown redis:redis /etc/redis/sentinel.conf
+
+sudo cp contrib/supervisor/rq-scheduler.conf /etc/supervisor/conf.d/rq-scheduler.conf
+sudo cp contrib/supervisor/rq-worker.conf /etc/supervisor/conf.d/rq-worker.conf
+
+sudo cp contrib/supervisor/pybossa.conf /etc/supervisor/conf.d/pybossa.conf
+
+---
+
+sudo passwd postgres
+
+Introduzca la nueva contraseña de UNIX: postgres
+
+su postgres
+
+createuser -d -P pybossa
+
+Enter password for new role: tester
+
+createdb pybossa -O pybossa
+
+exit
+
+python cli.py db_create
+
+---
+
+sudo service supervisor stop && sudo service supervisor start
+
+sudo service nginx restart
+
+---
+
+ps aux | grep redis
+
+/usr/bin/redis-server 127.0.0.1:6379
+/usr/bin/redis-sentinel *:26379
+
+ps aux | grep rq
+
+/home/developer/pybossa/env/bin/python app_context_rqworker.py scheduled_jobs super high medium low monthly quaterly
+/home/developer/pybossa/env/bin/python /home/developer/pybossa/env/bin/rqscheduler --host localhost --port 6379 --interval 60 --db 0
+
+---
+
+* Retry (sudo service supervisor restart) until it starts
+
+http://localhost
+
+ps aux | grep redis
+
+ps aux | grep rq
+
+---
+
+http://localhost
 
 ---
 
@@ -58,108 +162,14 @@ exit()
 
 ---
 
-cp settings_local.py.tmpl settings_local.py
+/var/log/redis
 
-geany settings_local.py
+/var/log/nginx
 
-cp alembic.ini.template alembic.ini
-
-geany alembic.ini
+/var/log/supervisor
 
 ---
 
-sudo su postgres
+find /home/`whoami`/pybossa -type f -name '*.pyc' -delete
 
-createuser -d -P pybossa
-
-createdb pybossa -O pybossa
-
-exit
-
-python cli.py db_create
-
----
-
-cp contrib/nginx/pybossa contrib/nginx/pybossa.template
-
-geany contrib/nginx/pybossa
-
-sudo cp contrib/nginx/pybossa /etc/nginx/sites-available
-
-sudo rm /etc/nginx/sites-enabled/default
-
-sudo ln -s /etc/nginx/sites-available/pybossa /etc/nginx/sites-enabled/pybossa
-
----
-
-cp contrib/pybossa.ini.template contrib/pybossa.ini
-
-geany contrib/pybossa.ini
-
----
-
-sudo service redis-server stop
-
-sudo killall redis-server
-
-sudo rm /etc/init.d/redis-server
-
----
-
-sudo cp contrib/supervisor/redis-server.conf /etc/supervisor/conf.d/
-sudo cp contrib/supervisor/redis-sentinel.conf /etc/supervisor/conf.d/
-sudo cp contrib/redis-supervisor/redis.conf /etc/redis/
-sudo cp contrib/redis-supervisor/sentinel.conf /etc/redis/
-
-sudo chown redis:redis /etc/redis/redis.conf
-sudo chown redis:redis /etc/redis/sentinel.conf
-
----
-
-cp contrib/supervisor/rq-scheduler.conf.template contrib/supervisor/rq-scheduler.conf
-
-geany contrib/supervisor/rq-scheduler.conf
-
-sudo cp contrib/supervisor/rq-scheduler.conf /etc/supervisor/conf.d/rq-scheduler.conf
-
----
-
-cp contrib/supervisor/rq-worker.conf.template contrib/supervisor/rq-worker.conf
-
-geany contrib/supervisor/rq-worker.conf
-
-sudo cp contrib/supervisor/rq-worker.conf /etc/supervisor/conf.d/rq-worker.conf
-
----
-
-cp contrib/supervisor/pybossa.conf.template contrib/supervisor/pybossa.conf
-
-geany contrib/supervisor/pybossa.conf
-
-sudo cp contrib/supervisor/pybossa.conf /etc/supervisor/conf.d/pybossa.conf
-
----
-
-sudo service nginx stop
-
-sudo service supervisor stop
-
-sudo service supervisor start
-
-sudo service nginx start
-
----
-
-http://localhost
-
----
-
-ps aux | grep redis
-
-/usr/bin/redis-server 127.0.0.1:6379
-/usr/bin/redis-sentinel *:26379
-
-ps aux | grep rq
-
-/home/developer/pybossa/env/bin/python app_context_rqworker.py scheduled_jobs super high medium low
-/home/developer/pybossa/env/bin/python /home/developer/pybossa/env/bin/rqscheduler --host localhost --port 6379 --interval 60 --db 1
+redis-cli FLUSHALL
